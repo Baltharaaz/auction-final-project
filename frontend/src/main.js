@@ -62,30 +62,35 @@ var store = {
 
 
 Vue.mixin({
-    created: function () {
+    created: async function () {
         // Inject the models to components
         this.$chatroomInstance = new ChatRoom()
         this.$deedRepoInstance = new DeedRepository()
         this.$auctionRepoInstance = new AuctionRepository()
         
-        this.$chatroomInstance.setWeb3(new Web3_1(Config.SHH_ENDPOINT))
+        //this.$chatroomInstance.setWeb3(new Web3_1(Config.SHH_ENDPOINT))
 
         // one instance of web3 available to all components
         if (typeof web3 !== 'undefined') {
-            web3 = new Web3(web3.currentProvider)
+            web3 = new Web3_1(window.ethereum)
             this.$auctionRepoInstance.setWeb3(web3)
             this.$deedRepoInstance.setWeb3(web3)
 
             store.setMetamaskInstalled()
-            web3.version.getNetwork((err, netId) => {
+            web3.eth.net.getId((err, netId) => {
                 store.setNetworkId(netId)
             })
-            // pull accounts every 2 seconds
-            setInterval(() => {
-                web3.eth.getAccounts((err, data) => {
-                    if(data.length > 0) store.setWeb3DefaultAccount(data[0])
-                })
-            }, 2000)
+            // Corrected account polling to web3 1.0
+			const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+			if(accounts.length > 0){
+				const account = accounts[0]
+				store.setWeb3DefaultAccount(account)
+			}
+			window.ethereum.on('accountsChanged', (accounts) => {
+				if(accounts.length > 0){
+					store.setWeb3DefaultAccount(accounts[0])
+				}
+			})
         }
         // inject config to components
         this.$config = Config

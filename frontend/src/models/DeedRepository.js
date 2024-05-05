@@ -12,7 +12,7 @@ export class DeedRepository {
     }
     setWeb3(web3) {
         this.web3 = web3
-        this.contractInstance = this.web3.eth.contract(Config.DEEDREPOSITORY_ABI).at(Config.DEEDREPOSITORY_ADDRESS)
+        this.contractInstance = new this.web3.eth.Contract(Config.DEEDREPOSITORY_ABI, Config.DEEDREPOSITORY_ADDRESS)
     }
     
     getWeb3() {

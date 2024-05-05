@@ -13,7 +13,7 @@ export class AuctionRepository {
 
     setWeb3(web3) {
         this.web3 = web3
-        this.contractInstance = this.web3.eth.contract(Config.AUCTIONREPOSITORY_ABI).at(Config.AUCTIONREPOSITORY_ADDRESS)
+        this.contractInstance = new this.web3.eth.Contract(Config.AUCTIONREPOSITORY_ABI, Config.AUCTIONREPOSITORY_ADDRESS)
     }
 
     getWeb3() {
