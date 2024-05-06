@@ -409,8 +409,8 @@ export default {
                 Object.keys(this.auction).map((key) => {
                     formData.append(key, this.auction[key])
                 })
-                const response = await this.$http.post(`${this.$config.BZZ_ENDPOINT}/bzz:/`, formData)
-                this.auction.metadata = response.body
+                //const response = await this.$http.post(`${this.$config.BZZ_ENDPOINT}/bzz:/`, formData)
+                //this.auction.metadata = response.body
 
                 console.log(this.auction)
 
