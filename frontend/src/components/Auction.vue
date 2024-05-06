@@ -274,18 +274,18 @@
                     let lastBidAmount = 0, lastBidAccount = 'N/A'
                     if(bidCount > 0) {
                         const res = await this.$auctionRepoInstance.getCurrentBid(auctionId)
-                        lastBidAmount = this.$auctionRepoInstance.getWeb3().fromWei(res[0].toNumber(), 'ether')
+                        lastBidAmount = this.$auctionRepoInstance.getWeb3().utils.fromWei(res[0].toNumber(), 'ether')
                         lastBidAccount = res[1]
                     }
                     let auction = await this.$auctionRepoInstance.findById(auctionId)
                     // get metadata
-                    const swarmResult = await this.$http.get(`${this.$config.BZZ_ENDPOINT}/bzz-list:/${auction[3]}`)
+                    /*const swarmResult = await this.$http.get(`${this.$config.BZZ_ENDPOINT}/bzz-list:/${auction[3]}`)
                     let imageUrl = ''
                     swarmResult.body.entries.map((entry) => {
                         if('contentType' in entry) imageUrl = `${this.$config.BZZ_ENDPOINT}/bzz-raw:/${auction[3]}/${entry.path}`
-                    })
+                    })*/
                     
-                    let expires = new Date(auction[1].toNumber() * 1000 ), now = new Date()
+                    let expires = new Date(Number(auction[1]) * 1000 ), now = new Date()
                     const expirationInHuman = moment.duration(moment(now).diff(expires)).humanize()
 
             
@@ -294,13 +294,12 @@
                         bids: parseInt(bidCount),
                         lastBidAmount: lastBidAmount,
                         lastBidAccount: lastBidAccount,
-                        image: imageUrl,
                         title: auction[0],
                         timeLeft: expirationInHuman,
-                        expirationDate: moment(new Date(auction[1].toNumber() * 1000)).format('dddd, MMMM Do YYYY, h:mm:ss a'),
-                        startingPrice: this.$auctionRepoInstance.getWeb3().fromWei(auction[2].toNumber(), 'ether'),
+                        expirationDate: moment(new Date(Number(auction[1]) * 1000)).format('dddd, MMMM Do YYYY, h:mm:ss a'),
+                        startingPrice: this.$auctionRepoInstance.getWeb3().utils.fromWei(web3.utils.BN(auction[2]).toString(), 'ether'),
                         metadata: auction[3],
-                        deedId: auction[4].toNumber(),
+                        deedId: Number(auction[4]),
                         deedRepositoryAddress: auction[5],
                         owner: auction[6],
                         active: auction[7],
