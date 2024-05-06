@@ -97,7 +97,8 @@ export class AuctionRepository {
         console.log(auctionId, this.web3.utils.toWei(price, 'ether'))
         return new Promise(async (resolve, reject) => {
             try {
-                this.contractInstance.methods.bidOnAuction(auctionId).send({from: this.account, gas: this.gas, value: this.web3.utils.toWei(price, 'ether') })
+                this.contractInstance.methods.bidOnAuction(auctionId)
+				.send({from: this.account, gas: this.gas, value: this.web3.utils.toWei(price, 'ether') })
 				.on('receipt', (receipt) => {resolve(receipt)})
 				.on('error', (error, receipt) => {
 					if(!error) resolve(receipt)

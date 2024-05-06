@@ -6,5 +6,13 @@ module.exports = {
       network_id: "*",
       gas: 3000000
     }
+  },
+  
+  solc: {
+	  version: "0.4.21",
+	  optimizer: {
+		  enabled: true,
+		  runs: 200
+	  }
   }
 };
