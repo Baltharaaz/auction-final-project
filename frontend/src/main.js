@@ -64,7 +64,7 @@ var store = {
 Vue.mixin({
     created: async function () {
         // Inject the models to components
-        this.$chatroomInstance = new ChatRoom()
+        //this.$chatroomInstance = new ChatRoom()
         this.$deedRepoInstance = new DeedRepository()
         this.$auctionRepoInstance = new AuctionRepository()
         

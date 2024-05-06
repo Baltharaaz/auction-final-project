@@ -1,3 +1,10 @@
+# Auction DApp Final Project
+
+This program forks the auction DApp example from the textbook codebase. You can find the original readme copied below.
+
+
+
+
 # Decentralized Auction Application on Ethereum
 
 This project aims to implement basic functionalities of an auction platform using Ethereum.

@@ -441,7 +441,7 @@ export default {
                 this.createAssetError = null
                 
                 this.$deedRepoInstance.setAccount(this.getWeb3DefaultAccount)
-                var trnasaction = await this.$deedRepoInstance.create(this.deed.deedId, this.deed.deedURI)
+                var transaction = await this.$deedRepoInstance.create(this.deed.deedId, this.deed.deedURI)
 
                 this.$deedRepoInstance.watchIfCreated((error, result) => {
                     // might get called multiple times
@@ -495,7 +495,7 @@ export default {
          */
         showAuction() {
             // get random deedid
-            this.deed.deedId = new web3.BigNumber(`${this.$root.$data.globalState.getRandomInt(123456789,999999999)}${this.$root.$data.globalState.getRandomInt(123456789,999999999)}`)
+            this.deed.deedId = new web3.utils.BN(`${this.$root.$data.globalState.getRandomInt(123456789,999999999)}${this.$root.$data.globalState.getRandomInt(123456789,999999999)}`)
             this.dialog = true;
         },
 

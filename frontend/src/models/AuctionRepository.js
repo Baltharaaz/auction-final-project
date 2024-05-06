@@ -13,7 +13,7 @@ export class AuctionRepository {
 
     setWeb3(web3) {
         this.web3 = web3
-        this.contractInstance = new this.web3.eth.Contract(Config.AUCTIONREPOSITORY_ABI, Config.AUCTIONREPOSITORY_ADDRESS)
+        this.contractInstance = new this.web3.eth.Contract(Config.AUCTIONREPOSITORY_ABI, Config.AUCTIONREPOSITORY_ADDRESS, {transactionConfirmationBlocks: 1})
     }
 
     getWeb3() {
@@ -60,7 +60,7 @@ export class AuctionRepository {
     getCurrentBid(auctionId) {
         return new Promise(async (resolve, reject) => {
             try {
-                this.contractInstance.getCurrentBid(auctionId, {from: this.account, gas: this.gas }, (err, transaction) => {
+                this.contractInstance.methods.getCurrentBid(auctionId).call({from: this.account, gas: this.gas }).then((err, transaction) => {
                     if(!err) resolve(transaction)
                     reject(err)
                 })
@@ -73,7 +73,7 @@ export class AuctionRepository {
     getBidCount(auctionId) {
         return new Promise(async (resolve, reject) => {
             try {
-                this.contractInstance.getBidsCount(auctionId, {from: this.account, gas: this.gas }, (err, transaction) => {
+                this.contractInstance.methods.getBidsCount(auctionId).call({from: this.account, gas: this.gas }).then((err, transaction) => {
                     if(!err) resolve(transaction)
                     reject(err)
                 })
@@ -86,7 +86,7 @@ export class AuctionRepository {
     getCount() {
         return new Promise(async (resolve, reject) => {
             try {
-                this.contractInstance.getCount({from: this.account, gas: this.gas }, (err, transaction) => {
+                this.contractInstance.methods.getCount().call({from: this.account, gas: this.gas }).then((err, transaction) => {
                     if(!err) resolve(transaction)
                     reject(err)
                 })
@@ -114,7 +114,7 @@ export class AuctionRepository {
         return new Promise(async (resolve, reject) => {
             try {
 
-                this.contractInstance.createAuction(Config.DEEDREPOSITORY_ADDRESS, deedId, auctionTitle, metadata, this.web3.utils.toWei(startingPrice, 'ether'), blockDeadline, {from: this.account, gas: this.gas }, (err, transaction) => {
+                this.contractInstance.methods.createAuction(Config.DEEDREPOSITORY_ADDRESS, deedId, auctionTitle, metadata, this.web3.utils.toWei(startingPrice, 'ether'), blockDeadline).send({from: this.account, gas: this.gas }).then((err, transaction) => {
                     if(!err) resolve(transaction)
                     reject(err)
                 })
@@ -127,7 +127,7 @@ export class AuctionRepository {
     cancel(auctionId) {
         return new Promise(async (resolve, reject) => {
             try {
-                this.contractInstance.cancelAuction(auctionId, {from: this.account, gas: this.gas }, (err, transaction) => {
+                this.contractInstance.methods.cancelAuction(auctionId).send({from: this.account, gas: this.gas }).then((err, transaction) => {
                     if(!err) resolve(transaction)
                     reject(err)
                 })
@@ -140,7 +140,7 @@ export class AuctionRepository {
     finalize(auctionId) {
         return new Promise(async (resolve, reject) => {
             try {
-                this.contractInstance.finalizeAuction(auctionId, {from: this.account, gas: this.gas }, (err, transaction) => {
+                this.contractInstance.methods.finalizeAuction(auctionId).send({from: this.account, gas: this.gas }).then((err, transaction) => {
                     if(!err) resolve(transaction)
                     reject(err)
                 })
@@ -153,7 +153,7 @@ export class AuctionRepository {
     findById(auctionId) {
         return new Promise(async (resolve, reject) => {
             try {
-                this.contractInstance.getAuctionById(auctionId, { from: this.account, gas: this.gas }, (err, transaction) => {
+                this.contractInstance.methods.getAuctionById(auctionId).call({ from: this.account, gas: this.gas }).then((err, transaction) => {
                     if(!err) resolve(transaction)
                     reject(err)
                 })
