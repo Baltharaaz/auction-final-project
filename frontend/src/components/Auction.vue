@@ -192,7 +192,7 @@
                 return `0x${("00000000" + auctionId.toString(16)).substr(-8)}`
             },
             isAuctionOwner(auction){
-                return auction.owner == this.$root.$data.globalState.getWeb3DefaultAccount()
+                return auction.owner.toLowerCase() == this.$root.$data.globalState.getWeb3DefaultAccount()
             },
             isLastBidder(auction){
                 return auction.lastBidAccount == this.$root.$data.globalState.getWeb3DefaultAccount()
