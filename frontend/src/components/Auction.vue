@@ -274,7 +274,7 @@
                     let lastBidAmount = 0, lastBidAccount = 'N/A'
                     if(bidCount > 0) {
                         const res = await this.$auctionRepoInstance.getCurrentBid(auctionId)
-                        lastBidAmount = this.$auctionRepoInstance.getWeb3().utils.fromWei(res[0].toNumber(), 'ether')
+                        lastBidAmount = this.$auctionRepoInstance.getWeb3().utils.fromWei(web3.utils.BN(res[0]).toString(), 'ether')
                         lastBidAccount = res[1]
                     }
                     let auction = await this.$auctionRepoInstance.findById(auctionId)

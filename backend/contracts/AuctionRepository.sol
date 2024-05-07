@@ -256,10 +256,10 @@ contract AuctionRepository {
 
         // owner can't bid on their auctions
         Auction memory myAuction = auctions[_auctionId];
-        if(myAuction.owner == msg.sender) revert();
+        if(myAuction.owner == msg.sender) revert("Cannot bid on your own auction");
 
         // if auction is expired
-        if( block.timestamp > myAuction.blockDeadline ) revert();
+        if( block.timestamp > myAuction.blockDeadline ) revert("Expired auction cannot be bid on");
 
         uint bidsLength = auctionBids[_auctionId].length;
         uint256 tempAmount = myAuction.startPrice;
@@ -272,12 +272,12 @@ contract AuctionRepository {
         }
 
         // check if amound is greater than previous amount  
-        if( ethAmountSent < tempAmount ) revert(); 
+        if( ethAmountSent < tempAmount ) revert("Bid must exceed previous amount"); 
 
         // refund the last bidder
         if( bidsLength > 0 ) {
             if(!lastBid.from.send(lastBid.amount)) {
-                revert();
+                revert("Bid refund failed");
             }  
         }
 

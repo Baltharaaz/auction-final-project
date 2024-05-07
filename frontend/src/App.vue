@@ -113,7 +113,7 @@
                                             <v-progress-linear v-bind:indeterminate="true"></v-progress-linear>
                                         </div>
                                         <v-btn v-show="!createAssetSuccess" :disabled="deed.deedURI.length==0 || creatingAsset" color="teal" outline @click.native="registerDeed()">Create Deed/Token</v-btn>
-                                        <!-- <v-btn v-show="!createAssetSuccess" outline color="teal" @click="stepperIndex++">Skip</v-btn> -->
+                                        <v-btn v-show="!createAssetSuccess" outline color="teal" @click="stepperIndex++">Skip</v-btn>
                                     </v-flex>
                                 </v-layout>
                             </v-card>
@@ -141,7 +141,7 @@
                                         </div>
                                         <v-btn :disabled="selectedDeed==null || transferDeedSuccess || transferingDeed " @click="transferTo()" outline color="teal">Transfer Ownership</v-btn>
                                         <v-btn v-show="transferDeedSuccess" outline color="primary" @click="stepperIndex++">Next</v-btn>
-                                        <!-- <v-btn outline color="teal" @click="stepperIndex++">Skip</v-btn> -->
+                                        <v-btn outline color="teal" @click="stepperIndex++">Skip</v-btn>
                                     </v-flex>
                                 </v-layout>
                             </v-card>
@@ -206,6 +206,7 @@
                                     </v-flex>
                                     <v-flex  style="height:100%; padding-bottom:20px;" xs12 sm6 md6>
                                         <v-btn @click="uploadAndCreateAuction()" outline color="teal">Create Auction</v-btn>
+										<v-btn outline color="teal" @click="stepperIndex=1">Reset</v-btn>
                                     </v-flex>
                                 </v-layout>
                             </v-card>

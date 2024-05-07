@@ -55,12 +55,21 @@ export class DeedRepository {
 
     exists(deedId) {
         return new Promise(async (resolve, reject) => {
-            this.contractInstance.methods.exists(deedId).send( {from: this.account, gas: this.gas } ).then((err, transaction) => {
-                if(!err) resolve(transaction)
-                reject(err)
+            this.contractInstance.methods.exists(deedId).call( {from: this.account, gas: this.gas } ).then((error, result) => {
+                if(!error) resolve(result)
+                reject(error)
             })
         })
     }
+	
+	ownedByContract(deedId){
+		return new Promise(async (resolve, reject) => {
+			this.contractInstance.ownerOf(deedId).call({from: this.account, gas: this.gas}).then((error, result) => {
+				if(!error) resolve(result)
+				reject(error)
+			})
+		})
+	}
 
     transferTo(to, deedId) {
         return new Promise(async (resolve, reject) => {
