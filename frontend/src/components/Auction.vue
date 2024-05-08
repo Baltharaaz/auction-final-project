@@ -376,11 +376,11 @@
                     this.loadingModal = false
             },
 			
-			async getBids(auctionId) {
+			/*async getBids(auctionId) {
 				this.$auctionRepoInstance.setAccount('')
 				let theBids = await this.$auctionRepoInstance.getBidsOnAuction(auctionId)
 				this.$set(this, 'bids', theBids)
-			}
+			}*/
         },
         async mounted() {
             this.roomHex = this.convertAuctionIDtoPaddedHex(parseInt(this.$route.params.id))
