@@ -29,6 +29,7 @@ contract AuctionRepository {
         string name;
         uint256 blockDeadline;
         uint256 startPrice;
+		uint256 buyoutPrice;
         string metadata;
         uint256 deedId;
         address deedRepositoryAddress;
@@ -88,6 +89,14 @@ contract AuctionRepository {
         uint[] memory ownedAuctions = auctionOwner[_owner];
         return ownedAuctions;
     }
+	/*
+	* @dev Gets all the bids on an auction
+	* @param _auctionId the id number of the auction
+	*/
+	function getBidsOnAuction(uint _auctionId) public view returns(Bid[] memory) {
+		Bid[] memory allTheBids = auctionBids[_auctionId];
+		return allTheBids;
+	}
 
     /**
     * @dev Gets an array of owned auctions
@@ -130,6 +139,7 @@ contract AuctionRepository {
         string memory name,
         uint256 blockDeadline,
         uint256 startPrice,
+		uint256 buyoutPrice,
         string memory metadata,
         uint256 deedId,
         address deedRepositoryAddress,
@@ -141,7 +151,8 @@ contract AuctionRepository {
         return (
             auc.name, 
             auc.blockDeadline, 
-            auc.startPrice, 
+            auc.startPrice,
+			auc.buyoutPrice,
             auc.metadata, 
             auc.deedId, 
             auc.deedRepositoryAddress, 
@@ -160,12 +171,13 @@ contract AuctionRepository {
     * @param _blockDeadline uint is the timestamp in which the auction expires
     * @return bool whether the auction is created
     */
-    function createAuction(address _deedRepositoryAddress, uint256 _deedId, string memory _auctionTitle, string memory _metadata, uint256 _startPrice, uint _blockDeadline) public contractIsDeedOwner(_deedRepositoryAddress, _deedId) returns(bool) {
+    function createAuction(address _deedRepositoryAddress, uint256 _deedId, string memory _auctionTitle, string memory _metadata, uint256 _startPrice, uint256 _buyoutPrice, uint _blockDeadline) public contractIsDeedOwner(_deedRepositoryAddress, _deedId) returns(bool) {
         uint auctionId = auctions.length;
         Auction memory newAuction;
         newAuction.name = _auctionTitle;
         newAuction.blockDeadline = _blockDeadline;
         newAuction.startPrice = _startPrice;
+		newAuction.buyoutPrice = _buyoutPrice;
         newAuction.metadata = _metadata;
         newAuction.deedId = _deedId;
         newAuction.deedRepositoryAddress = _deedRepositoryAddress;
@@ -282,14 +294,53 @@ contract AuctionRepository {
         }
 
         // insert bid 
-        Bid memory newBid;
         newBid.from = msg.sender;
         newBid.amount = ethAmountSent;
         auctionBids[_auctionId].push(newBid);
         emit BidSuccess(msg.sender, _auctionId);
     }
+	
+	function buyoutAuction(uint _auctionId) external payable {
+        uint256 ethAmountSent = msg.value;
+
+        // owner can't buyout their auctions
+        Auction memory myAuction = auctions[_auctionId];
+        if(myAuction.owner == msg.sender) revert("Cannot buyout your own auction");
+
+        // if auction is expired
+        if( block.timestamp > myAuction.blockDeadline ) revert("Expired auction cannot be bought out");
+
+        uint bidsLength = auctionBids[_auctionId].length;
+        uint256 tempAmount = myAuction.buyoutPrice;
+
+
+        // check if amound is greater than previous amount  
+        if( ethAmountSent < tempAmount ) revert("Buyout must match buyout price"); 
+
+        // refund the last bidder
+        if( bidsLength > 0 ) {
+            if(!lastBid.from.send(lastBid.amount)) {
+                revert("Bid refund failed");
+            }  
+        }
+
+        
+		// Complete buyout and finalize auction
+        if(!myAuction.owner.send(ethAmountSent)){
+			revert("Buyout payout failed");
+		}
+		
+		if(approveAndTransfer(address(this), msg.sender, myAuction.deedRepositoryAddress, myAuction.deedId)){
+			auctions[_auctionId].active = false;
+			auctions[_auctionId].finalized = true;
+			emit BuyoutSuccess(msg.sender, _auctionId);
+			emit AuctionFinalized(msg.sender, _auctionId);
+		}
+    }
 
     event BidSuccess(address _from, uint _auctionId);
+	
+	event BuyoutSuccess(address _from, uint _auctionId);
 
     // AuctionCreated is fired when an auction is created
     event AuctionCreated(address _owner, uint _auctionId);

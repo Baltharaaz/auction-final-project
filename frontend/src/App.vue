@@ -179,23 +179,31 @@
                                             persistent-hint
                                             ></v-text-field>
                                     </v-flex>
-                                    <!-- <v-flex  style="height:100%; padding-bottom:20px;" xs12 sm12 md12>
+                                    <v-flex  style="height:100%; padding-bottom:20px;" xs12 sm12 md12>
                                         <v-text-field
-                                            v-model="auction.reservePrice"
+                                            v-model="auction.buyoutPrice"
                                             placeholder="30 Ethers"
-                                            label="Reserve Price"
-                                            persistent-hint
-                                            ></v-text-field>
-                                    </v-flex> -->
-                                    <v-flex  style="height:100%; padding-bottom:20px;" xs12 sm6 md6>
-                                        <v-text-field
-                                            v-model="auction.timeInDays"
-                                            placeholder="30 Days"
-                                            label="Auction Expiration ( in days )"
+                                            label="Buyout Price"
                                             persistent-hint
                                             ></v-text-field>
                                     </v-flex>
-                                    <v-flex  style="height:100%; padding-bottom:20px;" xs12 sm6 md6>
+                                    <v-flex  style="height:100%; padding-bottom:20px;" xs8 sm4 md4>
+                                        <v-text-field
+                                            v-model="auction.timeBeforeConvert"
+                                            placeholder="30"
+                                            label="Auction Expiration"
+                                            persistent-hint
+                                            ></v-text-field>
+                                    </v-flex>
+									<v-flex  style="height:100%; padding-bottom:20px;" xs8 sm4 md4>
+                                        <v-select
+                                            v-model="auction.timeConvert"
+                                            :items="['minutes', 'hours', 'days']"
+                                            label="Time Units"
+                                            persistent-hint
+                                            ></v-select>
+                                    </v-flex>
+                                    <v-flex  style="height:100%; padding-bottom:20px;" xs8 sm4 md4>
                                         <v-text-field
                                             v-model="auction.timeInBlocks"
                                             disabled
@@ -308,10 +316,11 @@ export default {
             deedId: '',
             metadata: '',
             auctionTitle: '',
-            timeInDays: 0,
+            timeBeforeConvert: 0,
+			timeConvert: '',
             timeInBlocks: 0,
             startingPrice: null,
-            reservePrice: null,
+            buyoutPrice: null,
             fileInput: null,
            
         },
@@ -371,15 +380,45 @@ export default {
     watch: {
         
         // watch for the property for changes and update the associated filed
-        'auction.timeInDays': function(val){
+        'auction.timeBeforeConvert': function(val){
 
             let now = new Date();
-            let tms = now.setDate(now.getDate() + parseInt(val));
-
+			let tms;
+			switch (auction.timeConvert){
+				case 'minutes':
+					tms = now.setMinutes(now.getMinutes() + parseInt(val));
+					break;
+				case 'hours':
+					tms = now.setHours(now.getHours() + parseInt(val));
+					break;
+				case 'days':
+					tms = now.setDate(now.getDate() + parseInt(val));
+					break;
+				default:
+					tms = now.setDate(now.getDate() + parseInt(val));
+				}
             // ~15 seconds per block
             this.auction.timeInBlocks = parseInt(tms / 1000)
             //this.auction.timeInBlocks = val * 86400 / 15
-        }
+        },
+		'auction.timeConvert': function(val){
+			let now = new Date;
+			let tms;
+			switch (auction.timeConvert){
+				case 'minutes':
+					tms = now.setMinutes(now.getMinutes() + parseInt(val));
+					break;
+				case 'hours':
+					tms = now.setHours(now.getHours() + parseInt(val));
+					break;
+				case 'days':
+					tms = now.setDate(now.getDate() + parseInt(val));
+					break;
+				default:
+					tms = now.setDate(now.getDate() + parseInt(val));
+			}
+			this.auction.timeInBlocks = parseInt(tms / 1000);
+		}
     },
     methods: {
 
@@ -417,7 +456,7 @@ export default {
 
                 // create the smart contract
                 this.$auctionRepoInstance.setAccount(this.getWeb3DefaultAccount)
-                const transaction = await this.$auctionRepoInstance.create(this.auction.deedId, this.auction.auctionTitle, this.auction.metadata, this.auction.startingPrice, this.auction.timeInBlocks)
+                const transaction = await this.$auctionRepoInstance.create(this.auction.deedId, this.auction.auctionTitle, this.auction.metadata, this.auction.startingPrice, this.auction.buyoutPrice, this.auction.timeInBlocks)
                 this.$auctionRepoInstance.watchIfCreated((error, result) => {
                     if(!error) {
                         this.loadingModal = false

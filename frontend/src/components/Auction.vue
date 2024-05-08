@@ -21,8 +21,12 @@
                 <v-flex d-flex xs12 sm12 md12 style="text-align:left; margin-top:7px;">
                     <h3><v-icon dark >account_balance_wallet</v-icon> <b>Starting price: </b> {{auc.startingPrice}} ETH</h3>
                 </v-flex>
+				<v-flex d-flex xs12 sm12 md12 style="text-align:left; margin-top:7px;">
+                    <h3><v-icon dark >account_balance_wallet</v-icon> <b>Buyout price: </b> {{auc.buyoutPrice}} ETH</h3>
+                </v-flex>
                 <v-flex d-flex xs12 sm12 md12 style="text-align:left; margin-top:7px;">
                     <h3><v-icon dark >account_balance_wallet</v-icon> <b>Current bid: </b> {{auc.lastBidAmount}} ETH</h3>
+					<h4><v-btn @click="bidHistoryModal = true" style="margin:0;">Show Bid History</v-btn></h4>
                 </v-flex>
                 <v-flex d-flex xs12 sm12 md12 style="text-align:left; margin-top:7px;">
                     <h3><v-icon dark >perm_identity</v-icon> <b>{{auc.bids}}</b> bids</h3>
@@ -41,7 +45,12 @@
                     
                 <div style="margin-top:13px;">
                     <v-btn :disabled="isAuctionOwner(auc) || !auc.active" @click="bidModal = true" style=" margin:0; width:100%;" color="teal" dark> Bid now </v-btn>
-                    <span style="color:red;" v-show="isAuctionOwner(auc)">You can't bid on your own auctions</span>
+                    <span style="color:red;" v-show="isAuctionOwner(auc)">You can't bid on your own auctions!</span>
+					<span style="color:red;" v-show="bidTooLow">Bid must exceed starting price or current bid!</span>
+                </div>
+				<div style="margin-top:13px;">
+                    <v-btn :disabled="isAuctionOwner(auc) || !auc.active" @click="buyoutAuction" style=" margin:0; width:100%;" color="teal" dark> Buyout now </v-btn>
+                    <span style="color:red;" v-show="isAuctionOwner(auc)">You can't buyout your own auctions!</span>
                 </div>
                 <div style="margin-top:13px;">
                     <v-btn @click="cancelAuction(auc.id)" :disabled="!isAuctionOwner(auc) || !auc.active" style=" margin:0; width:100%;" color="teal" dark> Cancel Auction </v-btn>
@@ -163,6 +172,31 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
+	<v-dialog v-model="bidHistoryModal" max-width="290">
+        <v-card>
+            <v-card-title class="headline">Bid History</v-card-title>
+			<v-divider></v-divider>
+			<v-list style="overflow-y: scroll">
+				<v-list-tile v-for=((bid, i) in bids"
+				:key="i"
+				:value="bid"
+				>
+					<v-divider :key="i"></v-divider>
+					<v-list-tile-title v-text="bid.from"></v-list-tile-title>
+					<v-list-tile-sub-title v-text="bid.amount"></v-list-tile-sub-title>
+				</v-list-tile>
+			</v-list>
+			<v-flex style="height:100%; padding-bottom:5px;" xs12 sm12 md12>
+				<v-btn icon @click.native="bidHistoryModal = false" dark>
+					<v-icon>close</v-icon>
+					Close History
+				</v-btn>
+			</v-flex>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 
 </div>
 </template>
@@ -172,10 +206,14 @@
     export default {
         data: () => ({
             auction: [],
+			bids: [],
             roomHex: '',
             bidPrice: null,
+			buyoutPrice: null,
             bidModal: false,
+			bidHistoryModal: false,
             loadingModal: true,
+			bidTooLow: false,
             loading: false,
             connected: true,
             joined: false,
@@ -202,15 +240,42 @@
                 return auction.active ? 'Active' : 'Canceled'
             },
             async bid() {
-                this.bidModal = false
-                this.loadingModal = true
-                this.$auctionRepoInstance.setAccount(this.$root.$data.globalState.getWeb3DefaultAccount())
-                const result = await this.$auctionRepoInstance.bid(this.auction[0].id, this.bidPrice)
-                this.$auctionRepoInstance.watchIfBidSuccess((error, result) => {
-                     this.getAuction(this.$route.params.id) 
-                     this.loadingModal = false
-                })
+				try {
+					this.bidModal = false
+					this.loadingModal = true
+					if(lastBidAmount){
+						this.bidTooLow = bidPrice < auction[0].lastBidAmount
+					}else{
+						this.bidTooLow = bidPrice < auction[0].startingPrice
+					}
+					if(this.bidTooLow){
+						return
+					}
+						
+					this.$auctionRepoInstance.setAccount(this.$root.$data.globalState.getWeb3DefaultAccount())
+					const result = await this.$auctionRepoInstance.bid(this.auction[0].id, this.bidPrice)
+					this.$auctionRepoInstance.watchIfBidSuccess((error, result) => {
+						 this.getAuction(this.$route.params.id) 
+						 this.loadingModal = false
+						 this.bidTooLow = false
+					})
+				} catch(e){
+					this.loadingModal = false
+				}
             },
+			async buyout(){
+				try {
+					this.loadingModal = true
+					this.$auctionRepoInstance.setAccount(this.$root.$data.globalState.getWeb3DefaultAccount())
+					const result = await this.$auctionRepoInstance.buyout(this.auction[0].id, this.auction[0].buyoutPrice)
+					this.$auctionRepoInstance.watchIfBuyoutSuccess((error, result) => {
+						this.getAuction(this.$route.params.id)
+						this.loadingModal = false
+					})
+				} catch(e){
+					this.loadingModal = false
+				}
+			},
             async cancelAuction(auctionId) {
                 this.loadingModal = true
                 this.$auctionRepoInstance.setAccount(this.$root.$data.globalState.getWeb3DefaultAccount())
@@ -307,12 +372,19 @@
                     }]
                     this.$set(this, 'auction', compactAuction)
                     this.loadingModal = false
-            }
+            },
+			
+			async getBids(auctionId) {
+				this.$auctionRepoInstance.setAccount('')
+				let theBids = await this.$auctionRepoInstance.getBidsOnAuction(auctionId)
+				this.$set(this, 'bids', theBids)
+			}
         },
         async mounted() {
             this.roomHex = this.convertAuctionIDtoPaddedHex(parseInt(this.$route.params.id))
+			//this.getAllBids(this.$route.params.id)
             this.getAuction(this.$route.params.id)
-        },
+        }
     };
 </script>
 <style>

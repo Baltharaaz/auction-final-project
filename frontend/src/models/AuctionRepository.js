@@ -80,6 +80,18 @@ export class AuctionRepository {
             }
         })
     }
+	
+	getBidsOnAuction(auctionId) {
+		return new Promise(async (resolve, reject) => {
+            try {
+                this.contractInstance.methods.getBidsOnAuction(auctionId).call({from: this.account, gas: this.gas }).then((result) => {
+                    resolve(result)
+                })
+            } catch(e) {
+                reject(e)
+            }
+        })
+	}
 
     getCount() {
         return new Promise(async (resolve, reject) => {
@@ -109,11 +121,29 @@ export class AuctionRepository {
             }
         })
     }
-
-    create(deedId, auctionTitle, metadata, startingPrice, blockDeadline) {
+	
+	buyout(auctionId, price) {
+        console.log(auctionId, this.web3.utils.toWei(price, 'ether'))
         return new Promise(async (resolve, reject) => {
             try {
-                this.contractInstance.methods.createAuction(Config.DEEDREPOSITORY_ADDRESS, deedId, auctionTitle, metadata, this.web3.utils.toWei(startingPrice, 'ether'), blockDeadline)
+                this.contractInstance.methods.buyoutAuction(auctionId)
+				.send({from: this.account, gas: this.gas, value: this.web3.utils.toWei(price, 'ether') })
+				.on('receipt', (receipt) => {resolve(receipt)})
+				.on('error', (error, receipt) => {
+					if(!error) resolve(receipt)
+					reject(error)
+				})
+            } catch(e) {
+                reject(e)
+            }
+        })
+    }
+
+    create(deedId, auctionTitle, metadata, startingPrice, buyoutPrice, blockDeadline) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                this.contractInstance.methods.createAuction(Config.DEEDREPOSITORY_ADDRESS, deedId, auctionTitle, 
+				metadata, this.web3.utils.toWei(startingPrice, 'ether'), this.web3.utils.toWei(buyoutPrice, 'ether'), blockDeadline)
 				.send({from: this.account, gas: this.gas })
 				.on('receipt', (receipt) => {resolve(receipt)})
 				.on('error', (error, receipt) => {
