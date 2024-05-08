@@ -310,6 +310,7 @@ export default {
 
         // deployed deeds
         deeds: [],
+		theCreated: [],
 
         // auction model
         auction: {
@@ -384,14 +385,14 @@ export default {
 
             let now = new Date();
 			let tms;
-			switch (auction.timeConvert){
-				case 'minutes':
+			switch (this.auction.timeConvert){
+				case "minutes":
 					tms = now.setMinutes(now.getMinutes() + parseInt(val));
 					break;
-				case 'hours':
+				case "hours":
 					tms = now.setHours(now.getHours() + parseInt(val));
 					break;
-				case 'days':
+				case "days":
 					tms = now.setDate(now.getDate() + parseInt(val));
 					break;
 				default:
@@ -404,18 +405,18 @@ export default {
 		'auction.timeConvert': function(val){
 			let now = new Date;
 			let tms;
-			switch (auction.timeConvert){
-				case 'minutes':
-					tms = now.setMinutes(now.getMinutes() + parseInt(val));
+			switch (val){
+				case "minutes":
+					tms = now.setMinutes(now.getMinutes() + parseInt(this.auction.timeBeforeConvert));
 					break;
-				case 'hours':
-					tms = now.setHours(now.getHours() + parseInt(val));
+				case "hours":
+					tms = now.setHours(now.getHours() + parseInt(this.auction.timeBeforeConvert));
 					break;
-				case 'days':
-					tms = now.setDate(now.getDate() + parseInt(val));
+				case "days":
+					tms = now.setDate(now.getDate() + parseInt(this.auction.timeBeforeConvert));
 					break;
 				default:
-					tms = now.setDate(now.getDate() + parseInt(val));
+					tms = now.setDate(now.getDate() + parseInt(this.auction.timeBeforeConvert));
 			}
 			this.auction.timeInBlocks = parseInt(tms / 1000);
 		}

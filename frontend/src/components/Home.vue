@@ -109,7 +109,7 @@
               >Bid</v-btn
             >
             <v-btn @click="openAuction(auction.id)" outline color="blue" flat
-              >Chat</v-btn
+              >Open Auction</v-btn
             >
             <v-spacer></v-spacer>
           </v-card-actions>

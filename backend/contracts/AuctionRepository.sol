@@ -1,4 +1,5 @@
 pragma solidity ^0.5.16;
+pragma experimental ABIEncoderV2;
 
 import "./DeedRepository.sol";
 
@@ -294,6 +295,7 @@ contract AuctionRepository {
         }
 
         // insert bid 
+		Bid memory newBid;
         newBid.from = msg.sender;
         newBid.amount = ethAmountSent;
         auctionBids[_auctionId].push(newBid);
@@ -312,10 +314,16 @@ contract AuctionRepository {
 
         uint bidsLength = auctionBids[_auctionId].length;
         uint256 tempAmount = myAuction.buyoutPrice;
+		Bid memory lastBid;
 
 
         // check if amound is greater than previous amount  
         if( ethAmountSent < tempAmount ) revert("Buyout must match buyout price"); 
+		
+		// there are previous bids
+        if( bidsLength > 0 ) {
+            lastBid = auctionBids[_auctionId][bidsLength - 1];
+        }
 
         // refund the last bidder
         if( bidsLength > 0 ) {
@@ -326,7 +334,7 @@ contract AuctionRepository {
 
         
 		// Complete buyout and finalize auction
-        if(!myAuction.owner.send(ethAmountSent)){
+        if(!myAuction.owner.send(tempAmount)){
 			revert("Buyout payout failed");
 		}
 		
