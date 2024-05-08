@@ -7,7 +7,7 @@ is nonfunctional.
 ## Additional functionality
 #### 1. Completely converted demo package to web3 1.0 to expose previous implementation.
 #### 2. Added deployments to the Ethereum mainnet as well as additional testnets for a proper production deployment.
-Please note that these are not tested as acquiring the amounts of ethereum used inside the app for test purposes remains impractical.
+##### Please note that these are not tested as acquiring the amounts of ethereum used inside the app for test purposes remains impractical.
 #### 3. Implemented a buyout function to instantly purchase an auctioned item.
 #### 4. Expanded the auction creation system to include additional expiration time units beyond just days.
 #### 5. Implemented reserve price functionality by requiring bidding to start at the starting price.
