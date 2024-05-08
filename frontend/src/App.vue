@@ -468,6 +468,7 @@ export default {
 
 
             } catch(e) {
+				this.loadingModal = false
                 this.error = e.message
             } 
         },

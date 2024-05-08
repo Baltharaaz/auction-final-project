@@ -49,14 +49,14 @@
 					<span style="color:red;" v-show="bidTooLow">Bid must exceed starting price or current bid!</span>
                 </div>
 				<div style="margin-top:13px;">
-                    <v-btn :disabled="isAuctionOwner(auc) || !auc.active" @click="buyoutAuction" style=" margin:0; width:100%;" color="teal" dark> Buyout now </v-btn>
+                    <v-btn :disabled="isAuctionOwner(auc) || !auc.active" @click="buyout" style=" margin:0; width:100%;" color="teal" dark> Buyout now </v-btn>
                     <span style="color:red;" v-show="isAuctionOwner(auc)">You can't buyout your own auctions!</span>
                 </div>
                 <div style="margin-top:13px;">
                     <v-btn @click="cancelAuction(auc.id)" :disabled="!isAuctionOwner(auc) || !auc.active" style=" margin:0; width:100%;" color="teal" dark> Cancel Auction </v-btn>
                 </div>
                 <div style="margin-top:13px;">
-                    <v-btn @click="finalizeAuction(auc.id)" :disabled="!isAuctionOwner(auc) || !isLastBidder(auc)" style=" margin:0; width:100%;" color="teal" dark> Finalize Auction </v-btn>
+                    <v-btn @click="finalizeAuction(auc.id)" :disabled="(!isAuctionOwner(auc) && !isLastBidder(auc)) || !auc.active" style=" margin:0; width:100%;" color="teal" dark> Finalize Auction </v-btn>
                 </div>
                 </div>
             </v-flex>
@@ -233,7 +233,7 @@
                 return auction.owner.toLowerCase() == this.$root.$data.globalState.getWeb3DefaultAccount()
             },
             isLastBidder(auction){
-                return auction.lastBidAccount == this.$root.$data.globalState.getWeb3DefaultAccount()
+                return auction.lastBidAccount.toLowerCase() == this.$root.$data.globalState.getWeb3DefaultAccount()
             },
             auctionStatus(auction) {
                 if(auction.finalized && !auction.active) return 'Ended'
@@ -243,19 +243,20 @@
 				try {
 					this.bidModal = false
 					this.loadingModal = true
-					if(lastBidAmount){
-						this.bidTooLow = bidPrice < auction[0].lastBidAmount
+					/*if(lastBidAmount){
+						this.bidTooLow = Number(bidPrice) < Number(auction[0].lastBidAmount)
 					}else{
-						this.bidTooLow = bidPrice < auction[0].startingPrice
+						this.bidTooLow = Number(bidPrice) < Number(auction[0].startingPrice)
 					}
 					if(this.bidTooLow){
 						return
-					}
+					}*/
 						
 					this.$auctionRepoInstance.setAccount(this.$root.$data.globalState.getWeb3DefaultAccount())
 					const result = await this.$auctionRepoInstance.bid(this.auction[0].id, this.bidPrice)
 					this.$auctionRepoInstance.watchIfBidSuccess((error, result) => {
-						 this.getAuction(this.$route.params.id) 
+						 this.getAuction(this.$route.params.id)
+
 						 this.loadingModal = false
 						 this.bidTooLow = false
 					})
@@ -363,12 +364,13 @@
                         timeLeft: expirationInHuman,
                         expirationDate: moment(new Date(Number(auction[1]) * 1000)).format('dddd, MMMM Do YYYY, h:mm:ss a'),
                         startingPrice: this.$auctionRepoInstance.getWeb3().utils.fromWei(web3.utils.BN(auction[2]).toString(), 'ether'),
-                        metadata: auction[3],
-                        deedId: Number(auction[4]),
-                        deedRepositoryAddress: auction[5],
-                        owner: auction[6],
-                        active: auction[7],
-                        finalized: auction[8]
+						buyoutPrice: this.$auctionRepoInstance.getWeb3().utils.fromWei(web3.utils.BN(auction[3]).toString(), 'ether'),
+                        metadata: auction[4],
+                        deedId: Number(auction[5]),
+                        deedRepositoryAddress: auction[6],
+                        owner: auction[7],
+                        active: auction[8],
+                        finalized: auction[9]
                     }]
                     this.$set(this, 'auction', compactAuction)
                     this.loadingModal = false

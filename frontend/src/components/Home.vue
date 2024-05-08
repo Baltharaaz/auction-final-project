@@ -180,12 +180,13 @@ export default {
           "dddd, MMMM Do YYYY, h:mm:ss a"
         ),
         startingPrice: web3.utils.fromWei(web3.utils.BN(auction[2]).toString(), "ether"),
-        metadata: auction[3],
-        deedId: Number(auction[4]),
-        deedRepositoryAddress: auction[5],
-        owner: auction[6],
-        active: auction[7],
-        finalized: auction[8]
+		buyoutPrice: web3.utils.fromWei(web3.utils.BN(auction[3]).toString(), "ether"),
+        metadata: auction[4],
+        deedId: Number(auction[5]),
+        deedRepositoryAddress: auction[6],
+        owner: auction[7],
+        active: auction[8],
+        finalized: auction[9]
       });
     }
     this.loadingAuctions = false;
