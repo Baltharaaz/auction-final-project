@@ -1,5 +1,5 @@
-const HDWalletProvider = require('@truffle/hdwallet-provider');
-const fs = require('fs');
+//const HDWalletProvider = require('@truffle/hdwallet-provider');
+//const fs = require('fs');
 //const mnemonic = fs.readFileSync("mnemonic.secret").toString().trim();
 //const api = fs.readFileSync("api.skey").toString().trim();
 
@@ -12,7 +12,7 @@ module.exports = {
       gas: 3000000
     },
 	
-	sepolia: {
+	/*sepolia: {
 		provider: () => new HDWalletProvider(mnemonic, "https://sepolia.infura.io/v3/" + api),
 		network_id: 11155111, // Sepolia's network ID
 		skipDryRun: true,
@@ -37,7 +37,7 @@ module.exports = {
 		networkCheckTimeout: 120000,
 		timeoutBlocks: 20000,
 		disableConfirmationListener: true,
-	 },
+	 },*/
   },
   
   

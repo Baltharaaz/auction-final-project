@@ -285,7 +285,7 @@ contract AuctionRepository {
         }
 
         // check if amound is greater than previous amount  
-        if( ethAmountSent < tempAmount ) revert("Bid must exceed previous amount"); 
+        if( ethAmountSent <= tempAmount ) revert("Bid must exceed previous amount"); 
 
         // refund the last bidder
         if( bidsLength > 0 ) {
